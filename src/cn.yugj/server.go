@@ -20,6 +20,7 @@ func (s *server) SayHello(ctx context.Context, in *HelloRequest) (*HelloReply, e
 }
 
 func main() {
+
 	lis, err := net.Listen("tcp", PORT)
 
 	if err != nil {
@@ -27,7 +28,9 @@ func main() {
 	}
 
 	s := grpc.NewServer()
+
 	RegisterGreeterServer(s, &server{})
+
 	log.Println("rpc服务已经开启")
 	s.Serve(lis)
 }
