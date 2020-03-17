@@ -1,11 +1,14 @@
 package main
 
 import (
+	"github.com/openzipkin/zipkin-go"
 	"log"
 	"os"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
+	logreporter "github.com/openzipkin/zipkin-go/reporter/log"
 )
 
 const (
@@ -13,7 +16,24 @@ const (
 )
 
 func main() {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+
+	reporter := logreporter.NewReporter(log.New(os.Stderr, "", log.LstdFlags))
+	tracer, _ := zipkin.NewTracer(reporter)
+
+	//conn, err := grpc.Dial(address, grpc.WithInsecure())
+
+	var conn, err = grpc.Dial(address, grpc.WithInsecure(),grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
+
+	//conn, err = grpc.Dial(address, grpc.WithInsecure(), grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
+
+	//with remote service todo to test
+	//var conn, err = grpc.Dial(
+	//	address,
+	//	grpc.WithInsecure(),
+	//	grpc.WithStatsHandler(zipkingrpc.NewClientHandler(
+	//		tracer,
+	//		zipkingrpc.WithRemoteServiceName("remoteService"))))
+
 
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
